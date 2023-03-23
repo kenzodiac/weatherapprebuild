@@ -1,11 +1,96 @@
+//Importing CSS
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Row, Col, Container, Button, Form, Nav, Navbar, NavDropdown, Offcanvas } from 'react-bootstrap';
-import React, { useState } from 'react';
 import '../App.css'
+//Importing React/Bootstrap Components
+import { Row, Col, Container, Button, Form, Nav, Navbar, NavDropdown, Offcanvas } from 'react-bootstrap';
+import React, { useState, useEffect } from 'react';
+//Importing Components
 import CityInfoComponent from './CityInfoComponent';
 import DailyComponent from './DailyComponent';
+//Importing Functions From Services
+import { AsyncLocalWeatherCoords, AsyncLocalWeather, AsyncFiveDayWeather, AsyncReverseGeocoding } from '../Services/DataServices';
+import { saveFavoriteToLocalStorage, getLocalStorage, removeFromLocalStorage } from '../Services/LocalStorage';
+import ParseStateInfo from '../Services/StateCodeParsing';
+import EvaluateCurrentTime from '../Services/DateParsing';
+import EvaluateWeatherIcon from '../Services/EvalWeatherIcon';
+import EvaluateCurrentBackground from '../Services/EvalWeatherBg';
+
 
 export default function MainStage() {
+    //useStates for storing variables
+    const [locationData, setLocationData] = useState({});
+    const [currentCityData, setCurrentCityData] = useState({});
+    const [currentCity5DayData, setCurrentCity5DayData] = useState({});
+    const [currentTimeData, setCurrentTimeData] = useState({});
+    const [latitude, setLatitude] = useState(0);
+    const [longitude, setLongitude] = useState(0);
+    const [inputValue, setInputValue] = useState('');
+
+    //functions for handling search field input
+    const handleInputChange = (e) => {
+        setInputValue(e.target.value);
+    };
+
+    async function handleKeyPress(e) {
+        if (e.key === 'Enter') {
+            //console.log(inputValue);
+            //console.log(AsyncLocalWeatherCoords(inputValue));
+            setLatitude(await AsyncLocalWeatherCoords(inputValue).lat);
+            setLongitude(await AsyncLocalWeatherCoords(inputValue).lon);
+            //console.log(latitude);
+            //console.log(longitude);
+            setLocationData(await AsyncReverseGeocoding(latitude, longitude));
+            setCurrentCityData(await AsyncLocalWeather(latitude, longitude));
+            setCurrentTimeData(EvaluateCurrentTime());
+            setCurrentCity5DayData(await AsyncFiveDayWeather(latitude, longitude));
+            console.log(latitude);
+            console.log(longitude);
+            console.log(locationData);
+            console.log(currentCityData);
+            console.log(currentTimeData);
+            console.log(currentCity5DayData);
+        }
+    }
+
+    const handleSearchPress = () => {
+        console.log(latitude);
+        console.log(longitude);
+        console.log(locationData);
+        console.log(currentCityData);
+        console.log(currentTimeData);
+        console.log(currentCity5DayData);
+    }
+
+    //default location/time obtained from user browser on load
+    async function success(position){
+        setLatitude(position.coords.latitude);
+        setLongitude(position.coords.longitude);
+        await setLocationData(await AsyncReverseGeocoding(latitude, longitude));
+        await setCurrentCityData(await AsyncLocalWeather(latitude, longitude));
+        setCurrentTimeData(EvaluateCurrentTime());
+        await setCurrentCity5DayData(await AsyncFiveDayWeather(latitude, longitude));
+        console.log(latitude);
+        console.log(longitude);
+        console.log(locationData);
+        console.log(currentCityData);
+        console.log(currentTimeData);
+        console.log(currentCity5DayData);
+    };
+    function error(err){
+        console.warn(err.message);
+    };
+    const options = {
+        enableHighAccuracy: true,
+        timeout: 5000,
+        maximumAge: 0
+    };
+    useEffect(() => {
+        //navigator.geolocation.getCurrentPosition(success, error, options);
+        console.log('hi');
+
+    }, []);
+
+    //main return
     return (
         <Container>
             {/* ~~~~~~~~~~~~~~~Navbar~~~~~~~~~~~~~~~ */}
@@ -13,7 +98,7 @@ export default function MainStage() {
                 {['md'].map((expand) => (
                     <Navbar key={expand} bg="light" expand={expand} className="mb-3">
                         <Container fluid>
-                            <Navbar.Brand href="#">Navbar Offcanvas</Navbar.Brand>
+                            <Navbar.Brand href="#">Weather</Navbar.Brand>
                             <Navbar.Toggle aria-controls={`offcanvasNavbar-expand-${expand}`} />
                             <Navbar.Offcanvas
                                 id={`offcanvasNavbar-expand-${expand}`}
@@ -38,7 +123,15 @@ export default function MainStage() {
                                             className="me-2"
                                             aria-label="Search"
                                         />
-                                        <Button variant="outline-success">Search</Button>
+                                        <input
+                                            type="search" 
+                                            placeholder="search" 
+                                            className="me-2" 
+                                            aria-label="Search"
+                                            onChange={handleInputChange}
+                                            onKeyDown={handleKeyPress}
+                                        />
+                                        <button variant="outline-success" onClick={handleSearchPress}>Search</button>
                                     </Form>
                                 </Offcanvas.Body>
                             </Navbar.Offcanvas>
