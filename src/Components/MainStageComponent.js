@@ -18,7 +18,7 @@ import EvaluateCurrentBackground from '../Services/EvalWeatherBg';
 
 export default function MainStage() {
     //useStates for storing variables
-    const [locationData, setLocationData] = useState({});
+    const [locationData, setLocationData] = useState([{name: 'Lodi', state: 'California'}]);
     const [currentCityData, setCurrentCityData] = useState({});
     const [currentCity5DayData, setCurrentCity5DayData] = useState({});
     const [currentTimeData, setCurrentTimeData] = useState({});
@@ -33,22 +33,27 @@ export default function MainStage() {
 
     async function handleKeyPress(e) {
         if (e.key === 'Enter') {
+            const tempLat = await AsyncLocalWeatherCoords(inputValue).lat;
+            const tempLon = await AsyncLocalWeatherCoords(inputValue).lon
             //console.log(inputValue);
             //console.log(AsyncLocalWeatherCoords(inputValue));
-            setLatitude(await AsyncLocalWeatherCoords(inputValue).lat);
-            setLongitude(await AsyncLocalWeatherCoords(inputValue).lon);
-            //console.log(latitude);
-            //console.log(longitude);
-            setLocationData(await AsyncReverseGeocoding(latitude, longitude));
-            setCurrentCityData(await AsyncLocalWeather(latitude, longitude));
-            setCurrentTimeData(EvaluateCurrentTime());
-            setCurrentCity5DayData(await AsyncFiveDayWeather(latitude, longitude));
+            setLatitude(tempLat);
+            setLongitude(tempLon);
             console.log(latitude);
             console.log(longitude);
-            console.log(locationData);
-            console.log(currentCityData);
-            console.log(currentTimeData);
-            console.log(currentCity5DayData);
+            const tempLocData = await AsyncReverseGeocoding(tempLat, tempLon);
+            const tempCityData = await AsyncLocalWeather(tempLat, tempLon);
+            const temp5DayData = await AsyncFiveDayWeather(tempLat, tempLon);
+            setLocationData(tempLocData);
+            setCurrentCityData(tempCityData);
+            setCurrentTimeData(EvaluateCurrentTime());
+            setCurrentCity5DayData(temp5DayData);
+            //console.log(latitude);
+            //console.log(longitude);
+            //console.log(locationData);
+            //console.log(currentCityData);
+            //console.log(currentTimeData);
+            //console.log(currentCity5DayData);
         }
     }
 
@@ -63,18 +68,24 @@ export default function MainStage() {
 
     //default location/time obtained from user browser on load
     async function success(position){
-        setLatitude(position.coords.latitude);
-        setLongitude(position.coords.longitude);
-        await setLocationData(await AsyncReverseGeocoding(latitude, longitude));
-        await setCurrentCityData(await AsyncLocalWeather(latitude, longitude));
-        setCurrentTimeData(EvaluateCurrentTime());
-        await setCurrentCity5DayData(await AsyncFiveDayWeather(latitude, longitude));
-        console.log(latitude);
-        console.log(longitude);
-        console.log(locationData);
-        console.log(currentCityData);
-        console.log(currentTimeData);
-        console.log(currentCity5DayData);
+        const tempLat = position.coords.latitude;
+        const tempLon = position.coords.longitude;
+        setLatitude(tempLat);
+        setLongitude(tempLon);
+        const tempLocData = await AsyncReverseGeocoding(tempLat, tempLon);
+        const tempCityData = await AsyncLocalWeather(tempLat, tempLon);
+        const tempTimeData = EvaluateCurrentTime();
+        const temp5DayData = await AsyncFiveDayWeather(tempLat, tempLon);
+        setLocationData(tempLocData);
+        setCurrentCityData(tempCityData);
+        setCurrentTimeData(tempTimeData);
+        setCurrentCity5DayData(temp5DayData);
+        setTimeout(console.log(tempLat), 5000);
+        setTimeout(console.log(tempLon), 5000);
+        setTimeout(console.log(tempLocData), 5000);
+        setTimeout(console.log(tempCityData), 5000);
+        setTimeout(console.log(EvaluateCurrentTime()), 5000);
+        setTimeout(console.log(temp5DayData), 5000);
     };
     function error(err){
         console.warn(err.message);
@@ -85,9 +96,8 @@ export default function MainStage() {
         maximumAge: 0
     };
     useEffect(() => {
-        //navigator.geolocation.getCurrentPosition(success, error, options);
+        navigator.geolocation.getCurrentPosition(success, error, options);
         console.log('hi');
-
     }, []);
 
     //main return
@@ -131,7 +141,7 @@ export default function MainStage() {
                                             onChange={handleInputChange}
                                             onKeyDown={handleKeyPress}
                                         />
-                                        <button variant="outline-success" onClick={handleSearchPress}>Search</button>
+                                        <button type="button" variant="outline-success" onClick={handleSearchPress}>Search</button>
                                     </Form>
                                 </Offcanvas.Body>
                             </Navbar.Offcanvas>
@@ -147,13 +157,14 @@ export default function MainStage() {
                         <Row>
                             <Col>
                                 <CityInfoComponent 
-                                    city={'Lodi'}
-                                    state={'CA'}
+                                    city={locationData[0].name} //
+                                    state={ParseStateInfo(locationData[0].state)} //
                                     fav={'⭐'}
                                     highTemp={'58'}
                                     lowTemp={'39'}
                                     time={'12:30pm'}
                                     weatherConditions={'Clear Skies'}
+                                    currentTempF={'56'}
                                     currentTempC={'13'}
                                     windSpeed={'6'}
                                     highTempIcon={'☀️'}
