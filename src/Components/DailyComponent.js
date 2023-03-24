@@ -11,7 +11,6 @@ function DailyComponent(props) {
             <div><span className="fiveDayTemps me-3">H: {props.highTemp}° / L: {props.lowTemp}°</span></div>
         </div>
     );
-
 };
 
 export default DailyComponent;

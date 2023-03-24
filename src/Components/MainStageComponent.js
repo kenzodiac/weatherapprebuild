@@ -9,7 +9,6 @@ import CityInfoComponent from './CityInfoComponent';
 import DailyComponent from './DailyComponent';
 //Importing Functions From Services
 import { AsyncLocalWeatherCoords, AsyncLocalWeather, AsyncFiveDayWeather, AsyncReverseGeocoding } from '../Services/DataServices';
-import { saveFavoriteToLocalStorage, getLocalStorage, removeFromLocalStorage, saveLatitudeToLocalStorage, saveLongitudeToLocalStorage } from '../Services/LocalStorage';
 import ParseStateInfo from '../Services/StateCodeParsing';
 import EvaluateCurrentTime from '../Services/DateParsing';
 import EvaluateWeatherIcon from '../Services/EvalWeatherIcon';
@@ -121,25 +120,6 @@ export default function MainStage() {
         currentTime: "3:44pm",
         currentTimeDayOfWeek: "Thursday"
     });
-    //useState to load local storage
-    const [tempLocalStorage, setTempLocalStorage] = useState([]);
-    //useState for offcanvas
-    const [show, setShow] = useState(false);
-    //functions for offcanvas
-    const handleClose = () => setShow(false);
-    const handleShow = () => {
-        setShow(true);
-        console.log(tempLocalStorage);
-        setTempLocalStorage(getLocalStorage());
-        console.log(tempLocalStorage);
-
-    };
-    const handleClick = () => {
-        
-    };
-    const handleEraseClick = (item) => {
-        removeFromLocalStorage(item);
-    }
 
     async function handleKeyPress(e) {
         if (e.key === 'Enter') {
@@ -147,8 +127,6 @@ export default function MainStage() {
             let tempWeatherCoords = await AsyncLocalWeatherCoords(tempInput);
             let tempLat = tempWeatherCoords[0].lat;
             let tempLon = tempWeatherCoords[0].lon;
-            saveLatitudeToLocalStorage(tempLat);
-            saveLongitudeToLocalStorage(tempLon);
             let tempLocData = await AsyncReverseGeocoding(tempLat, tempLon);
             let tempCityData = await AsyncLocalWeather(tempLat, tempLon);
             let temp5DayData = await AsyncFiveDayWeather(tempLat, tempLon);
@@ -159,9 +137,6 @@ export default function MainStage() {
             let tempLaundered5DayData = await Parse5DayForecastInfo(temp5DayData);
             setLaunderedCurrentCity5DayData(tempLaundered5DayData);
 
-            const tempLocSto = getLocalStorage();
-            setTempLocalStorage(tempLocSto);
-
             setTimeout(console.log(tempLat), 500);
             setTimeout(console.log(tempLon), 500);
             setTimeout(console.log(tempWeatherCoords), 500);
@@ -171,14 +146,12 @@ export default function MainStage() {
             setTimeout(console.log(temp5DayData), 500);
             setTimeout(console.log(tempLaundered5DayData), 500);
         }
-    }
+    };
 
     //default location/time obtained from user browser on load
     async function success(position) {
         const tempLat = position.coords.latitude;
         const tempLon = position.coords.longitude;
-        saveLatitudeToLocalStorage(tempLat);
-        saveLongitudeToLocalStorage(tempLon);
         const tempLocData = await AsyncReverseGeocoding(tempLat, tempLon);
         const tempCityData = await AsyncLocalWeather(tempLat, tempLon);
         const tempTimeData = EvaluateCurrentTime();
@@ -189,9 +162,6 @@ export default function MainStage() {
         setCurrentCity5DayData(temp5DayData);
         const tempLaundered5DayData = await Parse5DayForecastInfo(temp5DayData);
         setLaunderedCurrentCity5DayData(tempLaundered5DayData);
-
-        const tempLocSto = getLocalStorage();
-        setTempLocalStorage(tempLocSto);
 
         // setTimeout(console.log(tempLat), 500);
         // setTimeout(console.log(tempLon), 500);
@@ -212,7 +182,6 @@ export default function MainStage() {
     useEffect(() => {
         navigator.geolocation.getCurrentPosition(success, error, options);
         document.body.setAttribute("style", `background-color: #3E3E3E`);
-        setTempLocalStorage(getLocalStorage());
     }, []);
 
 
@@ -226,7 +195,7 @@ export default function MainStage() {
                 {['md'].map((expand) => (
                     <Navbar key={expand} expand={expand} className="mb-3 navigation-bar">
                         <Container fluid>
-                            <button type="button" href="#" className="favorites-btn pe-3 me-5" onClick={handleShow}>⭐ Favorites</button>
+                            <button type="button" href="#" className="favorites-btn pe-3 me-5">⭐ Favorites</button>
                             <Navbar.Toggle aria-controls={`offcanvasNavbar-expand-${expand}`} />
                             <Navbar.Offcanvas
                                 id={`offcanvasNavbar-expand-${expand}`}
@@ -250,6 +219,13 @@ export default function MainStage() {
                                             aria-label="Search"
                                             onKeyDown={handleKeyPress}
                                         />
+                                        <input
+                                            type="search"
+                                            placeholder=" search"
+                                            className="me-2 rounded-3 search-bar d-none"
+                                            aria-label="Search"
+                                            onKeyDown={handleKeyPress}
+                                        />
                                     </Form>
                                 </Offcanvas.Body>
                             </Navbar.Offcanvas>
@@ -258,31 +234,8 @@ export default function MainStage() {
                 ))}
             </Row>
 
-            {/* ~~~~~~~~~~~~~~~Offcanvas Favorites~~~~~~~~~~~~~~~ */}
-            <Offcanvas show={show} onHide={handleClose}>
-                <Offcanvas.Header closeButton>
-                    <Offcanvas.Title>Favorite Locations</Offcanvas.Title>
-                </Offcanvas.Header>
-                <Offcanvas.Body>
-                    {tempLocalStorage[0] === null ? (<></>) : (
-                        tempLocalStorage.map((item, idx) => {
-                            return(
-                            <div key={idx}>
-                                <Row>
-                                    <Col className="mb-2">                                    
-                                        <Button style={{width: "calc(100% - 50px)"}} className="me-2" variant="success" type="button" onClick={handleClick}>{item.name}, {ParseStateInfo(item.state, item.country)}</Button>
-                                        <Button variant="danger" type="button" onClick={handleEraseClick(item)}>X</Button>
-                                    </Col>
-                                </Row>
-                            </div>
-                            );
-                        })
-                    )}
-                </Offcanvas.Body>
-            </Offcanvas>
-
             {/* ~~~~~~~~~~~~~~~Main Staging Area~~~~~~~~~~~~~~~ */}
-            <Row style={{ height: "calc(100vh - 124px)" }} className="align-items-center">
+            <Row style={{ minHeight: "calc(100vh - 124px)" }} className="align-items-center">
                 <Col>
                     <Container>
                         <Row className="g-5">
