@@ -9,69 +9,176 @@ import CityInfoComponent from './CityInfoComponent';
 import DailyComponent from './DailyComponent';
 //Importing Functions From Services
 import { AsyncLocalWeatherCoords, AsyncLocalWeather, AsyncFiveDayWeather, AsyncReverseGeocoding } from '../Services/DataServices';
-import { saveFavoriteToLocalStorage, getLocalStorage, removeFromLocalStorage } from '../Services/LocalStorage';
+import { saveFavoriteToLocalStorage, getLocalStorage, removeFromLocalStorage, saveLatitudeToLocalStorage, saveLongitudeToLocalStorage } from '../Services/LocalStorage';
 import ParseStateInfo from '../Services/StateCodeParsing';
 import EvaluateCurrentTime from '../Services/DateParsing';
 import EvaluateWeatherIcon from '../Services/EvalWeatherIcon';
 import EvaluateCurrentBackground from '../Services/EvalWeatherBg';
+import CapitalizeWords from '../Services/CapitalizeWords';
+import Parse5DayForecastInfo from '../Services/Parse5DayForecastInfo';
+import EvaluateFiveDayCardBg from '../Services/Eval5DayCardBg';
+
+import cloudIcon from '../assets/images/weatherIcons/cloudIcon.png';
+
 
 
 export default function MainStage() {
     //useStates for storing variables
-    const [locationData, setLocationData] = useState([{name: 'Lodi', state: 'California'}]);
-    const [currentCityData, setCurrentCityData] = useState({});
+    //location data from AsynchReverseWeatherCoords
+    const [locationData, setLocationData] = useState([{
+        name: 'Lodi',
+        state: 'California',
+        country: 'US'
+    }]);
+    //current city information from AsyncLocalWeather
+    const [currentCityData, setCurrentCityData] = useState({
+        main: { temp: 56 },
+        wind: { speed: 6 },
+        weather: [{ description: 'scattered clouds', icon: '03d', main: 'Clouds' }]
+    });
+    //current city 5 day forecast information from AsyncFiveDayWeather
     const [currentCity5DayData, setCurrentCity5DayData] = useState({});
-    const [currentTimeData, setCurrentTimeData] = useState({});
-    const [latitude, setLatitude] = useState(0);
-    const [longitude, setLongitude] = useState(0);
-    const [inputValue, setInputValue] = useState('');
+    //current city 5 day forecast information laundered for populating page
+    const [launderedCurrentCity5DayData, setLaunderedCurrentCity5DayData] = useState({
+        Day1: {
+            title: "Mon",
+            icon: cloudIcon,
+            highTemp: {
+                highTemp: 65,
+                highIcon: "03d",
+                highDescription: "Cloudy"
+            },
+            lowTemp: {
+                lowTemp: 32,
+                lowIcon: "03d",
+                highDescription: "Cloudy"
+            }
+        },
 
-    //functions for handling search field input
-    const handleInputChange = (e) => {
-        setInputValue(e.target.value);
+        Day2: {
+            title: "Tue",
+            icon: cloudIcon,
+            highTemp: {
+                highTemp: 65,
+                highIcon: "03d",
+                highDescription: "Cloudy"
+            },
+            lowTemp: {
+                lowTemp: 32,
+                lowIcon: "03d",
+                highDescription: "Cloudy"
+            }
+        },
+
+        Day3: {
+            title: "Wed",
+            icon: cloudIcon,
+            highTemp: {
+                highTemp: 65,
+                highIcon: "03d",
+                highDescription: "Cloudy"
+            },
+            lowTemp: {
+                lowTemp: 32,
+                lowIcon: "03d",
+                highDescription: "Cloudy"
+            }
+        },
+
+        Day4: {
+            title: "Thu",
+            icon: cloudIcon,
+            highTemp: {
+                highTemp: 65,
+                highIcon: "03d",
+                highDescription: "Cloudy"
+            },
+            lowTemp: {
+                lowTemp: 32,
+                lowIcon: "03d",
+                lowDescription: "Cloudy"
+            }
+        },
+
+        Day5: {
+            title: "Fri",
+            icon: cloudIcon,
+            highTemp: {
+                highTemp: 65,
+                highIcon: "03d",
+                highDescription: "Cloudy"
+            },
+            lowTemp: {
+                lowTemp: 32,
+                lowIcon: "03d",
+                highDescription: "Cloudy"
+            }
+        }
+    });
+    //current time
+    const [currentTimeData, setCurrentTimeData] = useState({
+        currentDate: "March 23, 2023",
+        currentTime: "3:44pm",
+        currentTimeDayOfWeek: "Thursday"
+    });
+    //useState to load local storage
+    const [tempLocalStorage, setTempLocalStorage] = useState([]);
+    //useState for offcanvas
+    const [show, setShow] = useState(false);
+    //functions for offcanvas
+    const handleClose = () => setShow(false);
+    const handleShow = () => {
+        setShow(true);
+        console.log(tempLocalStorage);
+        setTempLocalStorage(getLocalStorage());
+        console.log(tempLocalStorage);
+
     };
+    const handleClick = () => {
+        
+    };
+    const handleEraseClick = (item) => {
+        removeFromLocalStorage(item);
+    }
 
     async function handleKeyPress(e) {
         if (e.key === 'Enter') {
-            const tempLat = await AsyncLocalWeatherCoords(inputValue).lat;
-            const tempLon = await AsyncLocalWeatherCoords(inputValue).lon
-            //console.log(inputValue);
-            //console.log(AsyncLocalWeatherCoords(inputValue));
-            setLatitude(tempLat);
-            setLongitude(tempLon);
-            console.log(latitude);
-            console.log(longitude);
-            const tempLocData = await AsyncReverseGeocoding(tempLat, tempLon);
-            const tempCityData = await AsyncLocalWeather(tempLat, tempLon);
-            const temp5DayData = await AsyncFiveDayWeather(tempLat, tempLon);
+            let tempInput = e.target.value;
+            let tempWeatherCoords = await AsyncLocalWeatherCoords(tempInput);
+            let tempLat = tempWeatherCoords[0].lat;
+            let tempLon = tempWeatherCoords[0].lon;
+            saveLatitudeToLocalStorage(tempLat);
+            saveLongitudeToLocalStorage(tempLon);
+            let tempLocData = await AsyncReverseGeocoding(tempLat, tempLon);
+            let tempCityData = await AsyncLocalWeather(tempLat, tempLon);
+            let temp5DayData = await AsyncFiveDayWeather(tempLat, tempLon);
             setLocationData(tempLocData);
             setCurrentCityData(tempCityData);
             setCurrentTimeData(EvaluateCurrentTime());
             setCurrentCity5DayData(temp5DayData);
-            //console.log(latitude);
-            //console.log(longitude);
-            //console.log(locationData);
-            //console.log(currentCityData);
-            //console.log(currentTimeData);
-            //console.log(currentCity5DayData);
+            let tempLaundered5DayData = await Parse5DayForecastInfo(temp5DayData);
+            setLaunderedCurrentCity5DayData(tempLaundered5DayData);
+
+            const tempLocSto = getLocalStorage();
+            setTempLocalStorage(tempLocSto);
+
+            setTimeout(console.log(tempLat), 500);
+            setTimeout(console.log(tempLon), 500);
+            setTimeout(console.log(tempWeatherCoords), 500);
+            setTimeout(console.log(tempLocData), 500);
+            setTimeout(console.log(tempCityData), 500);
+            setTimeout(console.log(EvaluateCurrentTime()), 500);
+            setTimeout(console.log(temp5DayData), 500);
+            setTimeout(console.log(tempLaundered5DayData), 500);
         }
     }
 
-    const handleSearchPress = () => {
-        console.log(latitude);
-        console.log(longitude);
-        console.log(locationData);
-        console.log(currentCityData);
-        console.log(currentTimeData);
-        console.log(currentCity5DayData);
-    }
-
     //default location/time obtained from user browser on load
-    async function success(position){
+    async function success(position) {
         const tempLat = position.coords.latitude;
         const tempLon = position.coords.longitude;
-        setLatitude(tempLat);
-        setLongitude(tempLon);
+        saveLatitudeToLocalStorage(tempLat);
+        saveLongitudeToLocalStorage(tempLon);
         const tempLocData = await AsyncReverseGeocoding(tempLat, tempLon);
         const tempCityData = await AsyncLocalWeather(tempLat, tempLon);
         const tempTimeData = EvaluateCurrentTime();
@@ -80,14 +187,21 @@ export default function MainStage() {
         setCurrentCityData(tempCityData);
         setCurrentTimeData(tempTimeData);
         setCurrentCity5DayData(temp5DayData);
-        setTimeout(console.log(tempLat), 5000);
-        setTimeout(console.log(tempLon), 5000);
-        setTimeout(console.log(tempLocData), 5000);
-        setTimeout(console.log(tempCityData), 5000);
-        setTimeout(console.log(EvaluateCurrentTime()), 5000);
-        setTimeout(console.log(temp5DayData), 5000);
+        const tempLaundered5DayData = await Parse5DayForecastInfo(temp5DayData);
+        setLaunderedCurrentCity5DayData(tempLaundered5DayData);
+
+        const tempLocSto = getLocalStorage();
+        setTempLocalStorage(tempLocSto);
+
+        // setTimeout(console.log(tempLat), 500);
+        // setTimeout(console.log(tempLon), 500);
+        // setTimeout(console.log(tempLocData), 500);
+        // setTimeout(console.log(tempCityData), 500);
+        // setTimeout(console.log(EvaluateCurrentTime()), 500);
+        // setTimeout(console.log(temp5DayData), 500);
+        // setTimeout(console.log(tempLaundered5DayData), 500);
     };
-    function error(err){
+    function error(err) {
         console.warn(err.message);
     };
     const options = {
@@ -97,18 +211,22 @@ export default function MainStage() {
     };
     useEffect(() => {
         navigator.geolocation.getCurrentPosition(success, error, options);
-        console.log('hi');
+        document.body.setAttribute("style", `background-color: #3E3E3E`);
+        setTempLocalStorage(getLocalStorage());
     }, []);
+
+
 
     //main return
     return (
-        <Container>
+        <Container fluid style={{ height: "100vh" }}>
+
             {/* ~~~~~~~~~~~~~~~Navbar~~~~~~~~~~~~~~~ */}
-            <Row>
+            <Row className="">
                 {['md'].map((expand) => (
-                    <Navbar key={expand} bg="light" expand={expand} className="mb-3">
+                    <Navbar key={expand} expand={expand} className="mb-3 navigation-bar">
                         <Container fluid>
-                            <Navbar.Brand href="#">Weather</Navbar.Brand>
+                            <button type="button" href="#" className="favorites-btn pe-3 me-5" onClick={handleShow}>⭐ Favorites</button>
                             <Navbar.Toggle aria-controls={`offcanvasNavbar-expand-${expand}`} />
                             <Navbar.Offcanvas
                                 id={`offcanvasNavbar-expand-${expand}`}
@@ -121,27 +239,17 @@ export default function MainStage() {
                                     </Offcanvas.Title>
                                 </Offcanvas.Header>
                                 <Offcanvas.Body>
-                                    <Nav className="justify-content-end flex-grow-1 pe-3">
-                                        <Nav.Link href="#action1">Home</Nav.Link>
-                                        <Nav.Link href="#action2">Link</Nav.Link>
-
+                                    <Nav className="justify-content-center flex-grow-1 pe-3">
+                                        <Navbar.Brand href="#">Weather</Navbar.Brand>
                                     </Nav>
                                     <Form className="d-flex">
-                                        <Form.Control
-                                            type="search"
-                                            placeholder="Search"
-                                            className="me-2"
-                                            aria-label="Search"
-                                        />
                                         <input
-                                            type="search" 
-                                            placeholder="search" 
-                                            className="me-2" 
+                                            type="search"
+                                            placeholder=" search"
+                                            className="me-2 rounded-3 search-bar"
                                             aria-label="Search"
-                                            onChange={handleInputChange}
                                             onKeyDown={handleKeyPress}
                                         />
-                                        <button type="button" variant="outline-success" onClick={handleSearchPress}>Search</button>
                                     </Form>
                                 </Offcanvas.Body>
                             </Navbar.Offcanvas>
@@ -149,77 +257,107 @@ export default function MainStage() {
                     </Navbar>
                 ))}
             </Row>
-            
+
+            {/* ~~~~~~~~~~~~~~~Offcanvas Favorites~~~~~~~~~~~~~~~ */}
+            <Offcanvas show={show} onHide={handleClose}>
+                <Offcanvas.Header closeButton>
+                    <Offcanvas.Title>Favorite Locations</Offcanvas.Title>
+                </Offcanvas.Header>
+                <Offcanvas.Body>
+                    {tempLocalStorage[0] === null ? (<></>) : (
+                        tempLocalStorage.map((item, idx) => {
+                            return(
+                            <div key={idx}>
+                                <Row>
+                                    <Col className="mb-2">                                    
+                                        <Button style={{width: "calc(100% - 50px)"}} className="me-2" variant="success" type="button" onClick={handleClick}>{item.name}, {ParseStateInfo(item.state, item.country)}</Button>
+                                        <Button variant="danger" type="button" onClick={handleEraseClick(item)}>X</Button>
+                                    </Col>
+                                </Row>
+                            </div>
+                            );
+                        })
+                    )}
+                </Offcanvas.Body>
+            </Offcanvas>
+
             {/* ~~~~~~~~~~~~~~~Main Staging Area~~~~~~~~~~~~~~~ */}
-            <Row>
+            <Row style={{ height: "calc(100vh - 124px)" }} className="align-items-center">
                 <Col>
                     <Container>
-                        <Row>
-                            <Col>
-                                <CityInfoComponent 
+                        <Row className="g-5">
+                            <Col className={`rounded-3 pb-4 me-3 ms-4 cityInfoBg ${EvaluateCurrentBackground(currentCityData.weather[0].icon)}`}>
+                                <CityInfoComponent
                                     city={locationData[0].name} //
-                                    state={ParseStateInfo(locationData[0].state)} //
+                                    state={ParseStateInfo(locationData[0].state, locationData[0].country)} //
                                     fav={'⭐'}
-                                    highTemp={'58'}
-                                    lowTemp={'39'}
-                                    time={'12:30pm'}
-                                    weatherConditions={'Clear Skies'}
-                                    currentTempF={'56'}
-                                    currentTempC={'13'}
-                                    windSpeed={'6'}
-                                    highTempIcon={'☀️'}
-                                    lowTempIcon={'☀️'}
-                                    bgImage={'image.jpg'}
+                                    highTemp={launderedCurrentCity5DayData.Day1.highTemp.highTemp}
+                                    lowTemp={launderedCurrentCity5DayData.Day1.lowTemp.lowTemp}
+                                    day={currentTimeData.currentTimeDayOfWeek}
+                                    date={currentTimeData.currentDate}
+                                    time={currentTimeData.currentTime}
+                                    weatherConditions={CapitalizeWords(currentCityData.weather[0].description)}
+                                    currentWeatherIcon={EvaluateWeatherIcon(currentCityData.weather[0].icon)}
+                                    currentTempF={Math.round(currentCityData.main.temp)}
+                                    currentTempC={Math.round(((currentCityData.main.temp - 32) / 9) * 5)}
+                                    windSpeed={Math.round(currentCityData.wind.speed)}
+                                    highTempIcon={EvaluateWeatherIcon(launderedCurrentCity5DayData.Day1.highTemp.highIcon)}
+                                    lowTempIcon={EvaluateWeatherIcon(launderedCurrentCity5DayData.Day1.lowTemp.lowIcon)}
+                                    highDesc={launderedCurrentCity5DayData.Day1.highTemp.highDescription}
+                                    lowDesc={launderedCurrentCity5DayData.Day1.lowTemp.lowDescription}
+                                //bgImage={EvaluateCurrentBackground(currentCityData.weather[0].icon)}
                                 />
                             </Col>
-                            <Col>
-                                <span>5-Day Forecast</span>
+                            <Col className={"rounded-3 pb-4 me-4 ms-3"} style={{ backgroundColor: "#747474" }}>
+                                <div className="fiveDayHeader pb-1 pt-2">5-Day Forecast:</div>
                                 <DailyComponent
-                                    bgColor={'sunnyBg d-flex flex-row justify-content-between'}
-                                    day={'Mon'}
-                                    weatherIcon={'☀️'}
-                                    highTemp={'65'}
-                                    lowTemp={'32'}
+                                    bgColor={`${EvaluateFiveDayCardBg(launderedCurrentCity5DayData.Day1.icon)} d-flex flex-row justify-content-between rounded-3`}
+                                    day={launderedCurrentCity5DayData.Day1.title}
+                                    weatherIcon={EvaluateWeatherIcon(launderedCurrentCity5DayData.Day1.icon)}
+                                    highTemp={launderedCurrentCity5DayData.Day1.highTemp.highTemp}
+                                    lowTemp={launderedCurrentCity5DayData.Day1.lowTemp.lowTemp}
                                 />
                                 <DailyComponent
-                                    bgColor={'sunnyBg d-flex flex-row justify-content-between'}
-                                    day={'Tue'}
-                                    weatherIcon={'🍃'}
-                                    highTemp={'65'}
-                                    lowTemp={'32'}
+                                    bgColor={`${EvaluateFiveDayCardBg(launderedCurrentCity5DayData.Day2.icon)} d-flex flex-row justify-content-between my-3 rounded-3`}
+                                    day={launderedCurrentCity5DayData.Day2.title}
+                                    weatherIcon={EvaluateWeatherIcon(launderedCurrentCity5DayData.Day2.icon)}
+                                    highTemp={launderedCurrentCity5DayData.Day2.highTemp.highTemp}
+                                    lowTemp={launderedCurrentCity5DayData.Day2.lowTemp.lowTemp}
                                 />
                                 <DailyComponent
-                                    bgColor={'cloudyBg d-flex flex-row justify-content-between'}
-                                    day={'Wed'}
-                                    weatherIcon={'⛅'}
-                                    highTemp={'65'}
-                                    lowTemp={'32'}
+                                    bgColor={`${EvaluateFiveDayCardBg(launderedCurrentCity5DayData.Day3.icon)} d-flex flex-row justify-content-between my-3 rounded-3`}
+                                    day={launderedCurrentCity5DayData.Day3.title}
+                                    weatherIcon={EvaluateWeatherIcon(launderedCurrentCity5DayData.Day3.icon)}
+                                    highTemp={launderedCurrentCity5DayData.Day3.highTemp.highTemp}
+                                    lowTemp={launderedCurrentCity5DayData.Day3.lowTemp.lowTemp}
                                 />
                                 <DailyComponent
-                                    bgColor={'rainyBg d-flex flex-row justify-content-between'}
-                                    day={'Thu'}
-                                    weatherIcon={'🌧️'}
-                                    highTemp={'65'}
-                                    lowTemp={'32'}
+                                    bgColor={`${EvaluateFiveDayCardBg(launderedCurrentCity5DayData.Day4.icon)} d-flex flex-row justify-content-between my-3 rounded-3`}
+                                    day={launderedCurrentCity5DayData.Day4.title}
+                                    weatherIcon={EvaluateWeatherIcon(launderedCurrentCity5DayData.Day4.icon)}
+                                    highTemp={launderedCurrentCity5DayData.Day4.highTemp.highTemp}
+                                    lowTemp={launderedCurrentCity5DayData.Day4.lowTemp.lowTemp}
                                 />
                                 <DailyComponent
-                                    bgColor={'hazeBg d-flex flex-row justify-content-between'}
-                                    day={'Fri'}
-                                    weatherIcon={'🌫️'}
-                                    highTemp={'65'}
-                                    lowTemp={'32'}
+                                    bgColor={`${EvaluateFiveDayCardBg(launderedCurrentCity5DayData.Day5.icon)} d-flex flex-row justify-content-between rounded-3`}
+                                    day={launderedCurrentCity5DayData.Day5.title}
+                                    weatherIcon={EvaluateWeatherIcon(launderedCurrentCity5DayData.Day5.icon)}
+                                    highTemp={launderedCurrentCity5DayData.Day5.highTemp.highTemp}
+                                    lowTemp={launderedCurrentCity5DayData.Day5.lowTemp.lowTemp}
                                 />
                             </Col>
                         </Row>
                     </Container>
                 </Col>
             </Row>
-            
+
             {/* ~~~~~~~~~~~~~~~Footer~~~~~~~~~~~~~~~ */}
             <Row>
-                <Col>
-                    
-                </Col>
+                <Navbar className="navigation-bar">
+                    <Container className="d-flex justify-content-center">
+                        <Navbar.Brand>By: Kenneth Fujimura</Navbar.Brand>
+                    </Container>
+                </Navbar>
             </Row>
         </Container>
     );

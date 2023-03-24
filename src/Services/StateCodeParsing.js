@@ -1,5 +1,5 @@
 //parsing state names into state codes custom function
-export default function ParseStateInfo(state){
+export default function ParseStateInfo(state, country){
     let stateCode;
     switch(state){
         case "Alabama": stateCode = "AL"; break;
@@ -61,5 +61,11 @@ export default function ParseStateInfo(state){
         case "Wyoming": stateCode = "WY"; break;
         default: stateCode = null;
     }
-    return stateCode;
+    if (stateCode === null) {
+        // console.log(country);
+        return country;
+    } else {
+        // console.log(stateCode);
+        return stateCode;
+    }
 };

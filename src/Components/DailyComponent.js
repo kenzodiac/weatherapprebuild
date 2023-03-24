@@ -6,8 +6,9 @@ import '../App.css'
 function DailyComponent(props) {
     return(
         <div className={props.bgColor}>
-            <div><span>{props.day}: </span> {props.weatherIcon}</div>
-            <div><span>H: {props.highTemp}°/L: {props.lowTemp}°</span></div>
+            <div><span className="fiveDayName ms-3">{props.day}: </span></div>
+            <div><img className="fiveDayIcon" src={props.weatherIcon} alt="Weather Icon"/></div>
+            <div><span className="fiveDayTemps me-3">H: {props.highTemp}° / L: {props.lowTemp}°</span></div>
         </div>
     );
 

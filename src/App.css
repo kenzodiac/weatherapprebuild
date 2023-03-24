@@ -1,38 +1,181 @@
-.App {
-  text-align: center;
+@font-face {
+  font-family: Inter;
+  src: url(./assets/Fonts/Inter.ttf);
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+/* CSS For Background Images */
+.sunnyDay{
+  background-image: url('./assets/images/bgImages/sunnyDay.jpg');
+}
+.scatteredClouds{
+  background-image: url('./assets/images/bgImages/scatteredClouds.jpg');
+}
+.sunBehindCloud{
+  background-image: url('./assets/images/bgImages/sunBehindCloud.jpg');
+}
+.cloudy{
+  background-image: url('./assets/images/bgImages/cloudy.jpg');
+}
+.sunAndRain{
+  background-image: url('./assets/images/bgImages/sunAndRain.jpg');
+}
+.rainyDay{
+  background-image: url('./assets/images/bgImages/rainyDay.jpg');
+}
+.thunder{
+  background-image: url('./assets/images/bgImages/thunder.jpg');
+}
+.snow{
+  background-image: url('./assets/images/bgImages/snow.jpg');
+}
+.fog{
+  background-image: url('./assets/images/bgImages/fog.jpg');
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+/* CSS For Background Colors */
+.sunnyDayColor{
+  background-color: #3894FF;
+}
+.scatteredCloudsColor{
+  background-color: #57a5ff;
+}
+.sunBehindCloudColor{
+  background-color: #4978ae;
+}
+.cloudyColor{
+  background-color: #959595;
+}
+.sunAndRainColor{
+  background-color: #5285c1;
+}
+.rainyDayColor{
+  background-color: #506498;
+}
+.thunderColor{
+  background-color: rgb(222, 238, 106);
+}
+.snowColor{
+  background-color: #d3d3d3;
+}
+.fogColor{
+  background-color: #9C8C54;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+/* CSS For 5-Day Forecast Cards */
+.fiveDayIcon{
+  height: 100px;
+  width: auto;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
+}
+
+.fiveDayHeader{
+  font-size: 48px;
+  font-family: Inter;
+}
+
+.fiveDayName{
+  height: 100%;
+  font-size: 32px;
+  font-family: Inter;
+  display: flex;
+  align-items: center;
+}
+
+.fiveDayTemps{
+  font-size: 32px;
+  font-family: Inter;
+  color: white;
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+/* Current City Info */
+.cityInfoBg{
+  background-size: cover;
+  background-position-x: 30%
+}
+
+.cityInfoBody{
+  font-family: Inter;
+  height: 100%;
+}
+
+.cityName{
+  font-size: 48px;
+  line-height: 48px;
+}
+
+.citySubtitle{
+  font-size: 24px;
+  line-height: 24px;
+  color: white;
+  font-weight: 300;
+}
+
+.cityCurrentlyTitle{
+  font-size: 36px;
+}
+.cityCurrentlySubtitle{
+  font-size: 20px;
+}
+
+.cityCondition{
+  font-size: 30px;
   color: white;
 }
-
-.App-link {
-  color: #61dafb;
+.cityConditionIcon{
+  height: 36px;
+  width: auto;
+}
+.cityTempF{
+  font-size: 96px;
+  color: white;
+  line-height: 96px;
+}
+.cityTempC{
+  font-size: 36px;
+  color: white;
+  line-height: 36px;
+}
+.cityHighLowIcons{
+  height: 36px;
+  width: auto;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.navigation-bar{
+  background-color: #6F69AD;
+}
+
+.favorites-btn{
+  width: 180px;
+  height: 40px;
+  font-family: Inter;
+  font-size: 25px;
+  border: none;
+  background-color: #6F69AD;
+}
+.favorites-btn:hover{
+  transform: scale(1.04);
+}
+.favorites-btn:active{
+  transform: scale(.98);
+}
+
+.search-bar{
+  border-style: none;
+}
+
+.fav-btn{
+  background-color: #ffffff00;
+  border: none;
+}
+
+.fav-btn:hover{
+  transform: scale(1.04);
+}
+
+.fav-btn:active{
+  transform: scale(.98);
 }
