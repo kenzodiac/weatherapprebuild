@@ -123,6 +123,7 @@ export default function MainStage() {
 
     async function handleKeyPress(e) {
         if (e.key === 'Enter') {
+            // e.preventDefault();
             let tempInput = e.target.value;
             let tempWeatherCoords = await AsyncLocalWeatherCoords(tempInput);
             let tempLat = tempWeatherCoords[0].lat;
