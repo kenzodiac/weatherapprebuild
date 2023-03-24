@@ -17,11 +17,11 @@ function CityInfoComponent(props) {
     async function handleClick(){
         let tempData = getCoordsLocalStorage();
         setTempLocalStorage(getCoordsLocalStorage);
-        console.log(tempLocalStorage);
+        // console.log(tempLocalStorage);
         let tempData2 = await AsyncReverseGeocoding(tempData.Latitude, tempData.Longtiude);
-        console.log(tempData2);
+        // console.log(tempData2);
         saveFavoriteToLocalStorage(tempData2);
-        console.log(getLocalStorage());
+        // console.log(getLocalStorage());
     }
     
     return(

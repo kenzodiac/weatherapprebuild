@@ -137,14 +137,14 @@ export default function MainStage() {
             let tempLaundered5DayData = await Parse5DayForecastInfo(temp5DayData);
             setLaunderedCurrentCity5DayData(tempLaundered5DayData);
 
-            setTimeout(console.log(tempLat), 500);
-            setTimeout(console.log(tempLon), 500);
-            setTimeout(console.log(tempWeatherCoords), 500);
-            setTimeout(console.log(tempLocData), 500);
-            setTimeout(console.log(tempCityData), 500);
-            setTimeout(console.log(EvaluateCurrentTime()), 500);
-            setTimeout(console.log(temp5DayData), 500);
-            setTimeout(console.log(tempLaundered5DayData), 500);
+            // setTimeout(console.log(tempLat), 500);
+            // setTimeout(console.log(tempLon), 500);
+            // setTimeout(console.log(tempWeatherCoords), 500);
+            // setTimeout(console.log(tempLocData), 500);
+            // setTimeout(console.log(tempCityData), 500);
+            // setTimeout(console.log(EvaluateCurrentTime()), 500);
+            // setTimeout(console.log(temp5DayData), 500);
+            // setTimeout(console.log(tempLaundered5DayData), 500);
         }
     };
 
